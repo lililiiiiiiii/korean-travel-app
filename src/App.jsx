@@ -661,7 +661,7 @@ const styles = {
     padding: '20px 10px',
     backgroundColor: '#FFFBEB',
     borderRadius: '20px',
-    border: '2px dashed '#FDE68A''
+    border: '2px dashed #FDE68A'
   },
   bigKrText: {
     fontSize: '34px',
