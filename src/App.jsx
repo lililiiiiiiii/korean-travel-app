@@ -76,24 +76,41 @@ export default function App() {
     localStorage.setItem('kr_travel_vocab_v3', JSON.stringify(items));
   }, [items]);
 
-  // 🔊 雙引擎強效語音 (相容 iOS 靜音模式)
+  // 🔊 修正版：手機相容性最高的發音引擎
   const playAudio = (text) => {
-    if (!text) return;
-    const cleanText = text.trim();
+  if (!text) return;
+  const cleanText = text.trim();
 
-    const audioUrl = `https://dict.youdao.com/dictvoice?type=0&le=ko&audio=${encodeURIComponent(cleanText)}`;
-    const audio = new Audio(audioUrl);
+  // 1. 優先使用手機系統內建的原生語音 (Web Speech API)
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.cancel(); // 先停止上一次的播放
 
-    audio.play().catch(() => {
-      if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
-        const utterance = new SpeechSynthesisUtterance(cleanText);
-        utterance.lang = 'ko-KR';
-        utterance.rate = 0.85;
-        window.speechSynthesis.speak(utterance);
+    const utterance = new SpeechSynthesisUtterance(cleanText);
+    utterance.lang = 'ko-KR'; // 設定韓文
+    utterance.rate = 0.85;   // 稍微放慢語速，方便聽清
+
+    // iOS 必備修復：解鎖語音播放
+    window.speechSynthesis.speak(utterance);
+    
+    // 驗證播放：如果 500ms 後系統沒有開始發聲，自動切換為網絡音訊備援
+    setTimeout(() => {
+      if (!window.speechSynthesis.speaking && !window.speechSynthesis.pending) {
+        fallbackToAudioStream(cleanText);
       }
-    });
-  };
+    }, 500);
+  } else {
+    fallbackToAudioStream(cleanText);
+  }
+};
+
+// 備援方案：網路 MP3 流
+const fallbackToAudioStream = (cleanText) => {
+  const audioUrl = `https://dict.youdao.com/dictvoice?type=0&le=ko&audio=${encodeURIComponent(cleanText)}`;
+  const audio = new Audio(audioUrl);
+  audio.play().catch((err) => {
+    console.log('音訊播放受阻：', err);
+  });
+};
 
   // ⚙️️ 恢復預設詞彙 (保留自訂項)
   const handleResetToDefault = () => {
