@@ -67,6 +67,7 @@ export default function App() {
 
   const [showAddForm, setShowAddForm] = useState(false);
   const [showManageMenu, setShowManageMenu] = useState(false);
+  const [isTranslating, setIsTranslating] = useState(false);
 
   const [newKr, setNewKr] = useState('');
   const [newZh, setNewZh] = useState('');
@@ -76,43 +77,38 @@ export default function App() {
     localStorage.setItem('kr_travel_vocab_v3', JSON.stringify(items));
   }, [items]);
 
-  // 🔊 修正版：手機相容性最高的發音引擎
+  // 🔊 手機相容性優化發音引擎
   const playAudio = (text) => {
-  if (!text) return;
-  const cleanText = text.trim();
+    if (!text) return;
+    const cleanText = text.trim();
 
-  // 1. 優先使用手機系統內建的原生語音 (Web Speech API)
-  if ('speechSynthesis' in window) {
-    window.speechSynthesis.cancel(); // 先停止上一次的播放
+    // 1. 優先使用裝置內建原生 TTS (Web Speech API)
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(cleanText);
+      utterance.lang = 'ko-KR';
+      utterance.rate = 0.85;
 
-    const utterance = new SpeechSynthesisUtterance(cleanText);
-    utterance.lang = 'ko-KR'; // 設定韓文
-    utterance.rate = 0.85;   // 稍微放慢語速，方便聽清
+      window.speechSynthesis.speak(utterance);
 
-    // iOS 必備修復：解鎖語音播放
-    window.speechSynthesis.speak(utterance);
-    
-    // 驗證播放：如果 500ms 後系統沒有開始發聲，自動切換為網絡音訊備援
-    setTimeout(() => {
-      if (!window.speechSynthesis.speaking && !window.speechSynthesis.pending) {
-        fallbackToAudioStream(cleanText);
-      }
-    }, 500);
-  } else {
-    fallbackToAudioStream(cleanText);
-  }
-};
+      // 檢查是否順利發聲，若無則啟動備援 MP3 流
+      setTimeout(() => {
+        if (!window.speechSynthesis.speaking && !window.speechSynthesis.pending) {
+          fallbackAudioStream(cleanText);
+        }
+      }, 400);
+    } else {
+      fallbackAudioStream(cleanText);
+    }
+  };
 
-// 備援方案：網路 MP3 流
-const fallbackToAudioStream = (cleanText) => {
-  const audioUrl = `https://dict.youdao.com/dictvoice?type=0&le=ko&audio=${encodeURIComponent(cleanText)}`;
-  const audio = new Audio(audioUrl);
-  audio.play().catch((err) => {
-    console.log('音訊播放受阻：', err);
-  });
-};
+  const fallbackAudioStream = (cleanText) => {
+    const audioUrl = `https://dict.youdao.com/dictvoice?type=0&le=ko&audio=${encodeURIComponent(cleanText)}`;
+    const audio = new Audio(audioUrl);
+    audio.play().catch((err) => console.log('Audio playback prevented:', err));
+  };
 
-  // ⚙️️ 恢復預設詞彙 (保留自訂項)
+  // ⚙️ 恢復預設詞彙 (保留自訂項)
   const handleResetToDefault = () => {
     if (window.confirm('確定要恢復預設單字庫嗎？(您自行新增的短語將會保留)')) {
       const userCustomItems = items.filter((item) => item.isCustom);
@@ -132,17 +128,45 @@ const fallbackToAudioStream = (cleanText) => {
     }
   };
 
-  // ➕ 新增短語
-  const handleAddItem = (e) => {
+  // ➕ 新增短語：支援自動翻譯
+  const handleAddItem = async (e) => {
     e.preventDefault();
-    if (!newKr.trim() || !newZh.trim()) return;
+    if (!newZh.trim()) return;
+
+    let translatedKr = newKr.trim();
+
+    // 如果使用者沒有輸入韓文，自動呼叫免費 MyMemory API 進行翻譯
+    if (!translatedKr) {
+      try {
+        setIsTranslating(true);
+        const res = await fetch(
+          `https://api.mymemory.translated.net/get?q=${encodeURIComponent(newZh.trim())}&langpair=zh-TW|ko`
+        );
+        const data = await res.json();
+        
+        if (data.responseData && data.responseData.translatedText) {
+          translatedKr = data.responseData.translatedText;
+        } else {
+          alert('自動翻譯失敗，請手動輸入韓文');
+          setIsTranslating(false);
+          return;
+        }
+      } catch (error) {
+        console.error('Translation error:', error);
+        alert('翻譯服務連線失敗，請手動輸入韓文');
+        setIsTranslating(false);
+        return;
+      } finally {
+        setIsTranslating(false);
+      }
+    }
 
     const newItem = {
       id: Date.now(),
       category: newCategory,
-      kr: newKr.trim(),
+      kr: translatedKr,
       zh: newZh.trim(),
-      romaja: 'Custom',
+      romaja: 'Auto-translated',
       isCustom: true
     };
 
@@ -177,7 +201,6 @@ const fallbackToAudioStream = (cleanText) => {
               <span style={styles.flagIcon}>🇰🇷</span>
               <div>
                 <h1 style={styles.brandTitle}>韓國旅遊隨身冊</h1>
-                <p style={styles.brandSubtitle}>WordFlip Travel Edition</p>
               </div>
             </div>
             <div style={{ display: 'flex', gap: '8px' }}>
@@ -212,7 +235,7 @@ const fallbackToAudioStream = (cleanText) => {
           <div style={styles.searchWrapper}>
             <input
               type="text"
-              placeholder="🔍 搜尋韓文、中文、拼音 (例: 香菜, 試吃)..."
+              placeholder="🔍 搜尋韓文、中文、拼音"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               style={styles.searchInput}
@@ -233,25 +256,24 @@ const fallbackToAudioStream = (cleanText) => {
           </div>
         </header>
 
-        {/* ➕ 新增短語表單 */}
+        {/* ➕ 新增短語表單 (支援中文自動翻譯) */}
         {showAddForm && (
           <form onSubmit={handleAddItem} style={styles.addForm}>
-            <h3 style={styles.formTitle}>新增自訂短語/單字</h3>
+            <h3 style={styles.formTitle}>新增自訂短語 (輸入中文可自動翻譯)</h3>
             <input
               type="text"
-              placeholder="韓文 (例: 영수증 버려주세요)"
-              value={newKr}
-              onChange={(e) => setNewKr(e.target.value)}
+              placeholder="中文翻譯 (例: 請幫我微波這個) *"
+              value={newZh}
+              onChange={(e) => setNewZh(e.target.value)}
               style={styles.input}
               required
             />
             <input
               type="text"
-              placeholder="中文翻譯 (例: 請幫我丟掉收據)"
-              value={newZh}
-              onChange={(e) => setNewZh(e.target.value)}
+              placeholder="韓文 (留空將自動翻譯中文)"
+              value={newKr}
+              onChange={(e) => setNewKr(e.target.value)}
               style={styles.input}
-              required
             />
             <select
               value={newCategory}
@@ -265,7 +287,9 @@ const fallbackToAudioStream = (cleanText) => {
               <option value="basic">👋 常用</option>
               <option value="emergency">🆘 應急</option>
             </select>
-            <button type="submit" style={styles.submitBtn}>保存至隨身冊</button>
+            <button type="submit" style={styles.submitBtn} disabled={isTranslating}>
+              {isTranslating ? '⏳ 正在自動翻譯中...' : '✨ 自動翻譯並儲存'}
+            </button>
           </form>
         )}
 
@@ -330,7 +354,7 @@ const fallbackToAudioStream = (cleanText) => {
   );
 }
 
-// 🎨 韓系簡約極致 UI 樣式系統 (Design System)
+// 🎨 韓系簡約極致 UI 樣式系統
 const styles = {
   appContainer: {
     backgroundColor: '#F9F8F6',
