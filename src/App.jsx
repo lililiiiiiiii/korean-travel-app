@@ -592,14 +592,18 @@ const styles = {
     border: '1px solid #E5E5EA',
     fontSize: '14px',
     outline: 'none',
-    backgroundColor: '#FAFAFA'
+    backgroundColor: '#FAFAFA',
+    color: '#1C1C1E', // 👈 強制指定字體顏色，避免在深色模式下看不見
+    WebkitTextFillColor: '#1C1C1E' // 👈 Safari / iOS 專用字體顏色修復
   },
   select: {
     padding: '12px',
     borderRadius: '12px',
     border: '1px solid #E5E5EA',
     fontSize: '14px',
-    backgroundColor: '#FFF'
+    backgroundColor: '#FFFFFF',
+    color: '#1C1C1E', // 👈 強制指定字體顏色
+    WebkitTextFillColor: '#1C1C1E' // 👈 Safari / iOS 專用字體顏色修復
   },
   submitBtn: {
     padding: '12px',
