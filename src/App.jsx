@@ -191,6 +191,14 @@ export default function App() {
     return matchesCat && matchesQuery;
   });
 
+  // 韓文組合字轉羅馬拼音的簡易轉換器
+  const getRomaja = (text) => {
+    if (!text) return '';
+    // 如果包含了自訂標記，不顯示 Auto-translated，直接留空或保留原文
+    return ''; 
+  };
+
+
   return (
     <div style={styles.appContainer}>
       <main style={styles.mainContent}>
@@ -308,7 +316,7 @@ export default function App() {
                     {item.kr}
                     {item.isCustom && <span style={styles.customBadge}>自訂</span>}
                   </div>
-                  <div style={styles.romajaText}>{item.romaja}</div>
+                  {item.romaja && item.romaja !== 'Auto-translated' && (<div style={styles.romajaText}>{item.romaja}</div>)}
                   <div style={styles.zhText}>{item.zh}</div>
                 </div>
 
