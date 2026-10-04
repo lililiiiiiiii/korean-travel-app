@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-// 📚 韓國旅遊高頻精選詞彙庫 (餐廳、市場、計程車、交通、常用、應急)
+// 📚 韓國旅遊高頻精選詞彙庫
 const INITIAL_VOCAB = [
   // 🍱 餐廳/點餐 (Dining)
   { id: 1, category: 'dining', kr: '여기요!', zh: '不好意思 / 老闆！（餐廳呼叫）', romaja: 'Yeo-gi-yo!', isFavorite: false },
@@ -64,7 +64,7 @@ export default function App() {
 
   const [selectedCategory, setSelectedCategory] = useState('ALL');
   const [searchQuery, setSearchQuery] = useState('');
-  const [sortBy, setSortBy] = useState('favorite'); // 'favorite' | 'newest' | 'default'
+  const [sortBy, setSortBy] = useState('favorite');
   const [fullscreenCard, setFullscreenCard] = useState(null);
 
   const [showAddForm, setShowAddForm] = useState(false);
@@ -84,7 +84,6 @@ export default function App() {
     if (!text) return;
     const cleanText = text.trim();
 
-    // 1. 優先使用裝置內建原生 TTS (Web Speech API)
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(cleanText);
@@ -93,7 +92,6 @@ export default function App() {
 
       window.speechSynthesis.speak(utterance);
 
-      // 檢查是否順利發聲，若無則啟動備援 MP3 流
       setTimeout(() => {
         if (!window.speechSynthesis.speaking && !window.speechSynthesis.pending) {
           fallbackAudioStream(cleanText);
@@ -117,7 +115,7 @@ export default function App() {
     ));
   };
 
-  // ⚙️ 恢復預設詞彙 (保留自訂項)
+  // ⚙️ 恢復預設詞彙
   const handleResetToDefault = () => {
     if (window.confirm('確定要恢復預設單字庫嗎？(您自行新增的短語將會保留)')) {
       const userCustomItems = items.filter((item) => item.isCustom);
@@ -144,7 +142,6 @@ export default function App() {
 
     let translatedKr = newKr.trim();
 
-    // 如果使用者沒有輸入韓文，自動呼叫免費 MyMemory API 進行翻譯
     if (!translatedKr) {
       try {
         setIsTranslating(true);
@@ -239,7 +236,7 @@ export default function App() {
                 onClick={() => { setShowManageMenu(!showManageMenu); setShowAddForm(false); }}
                 style={styles.manageToggleBtn}
               >
-                ⚙️
+                ⚙
               </button>
             </div>
           </div>
@@ -290,7 +287,7 @@ export default function App() {
           </div>
         </header>
 
-        {/* ➕ 新增短語表單 (支援中文自動翻譯) */}
+        {/* ➕ 新增短語表單 */}
         {showAddForm && (
           <form onSubmit={handleAddItem} style={styles.addForm}>
             <h3 style={styles.formTitle}>新增自訂短語 (輸入中文可自動翻譯)</h3>
@@ -337,9 +334,15 @@ export default function App() {
           ) : (
             filteredAndSortedItems.map((item) => (
               <div key={item.id} style={styles.card}>
-                <div style={styles.cardMain}>
+                {/* 👈 點擊主要文字區域直接播放發音 */}
+                <div 
+                  style={styles.cardMainClickable} 
+                  onClick={() => playAudio(item.kr)}
+                  title="點擊播放發音"
+                >
                   <div style={styles.krText}>
                     {item.kr}
+                    <span style={styles.speakerIcon}>🔊</span>
                     {item.isCustom && <span style={styles.customBadge}>自訂</span>}
                   </div>
                   {item.romaja && item.romaja !== 'Auto-translated' && (
@@ -348,20 +351,17 @@ export default function App() {
                   <div style={styles.zhText}>{item.zh}</div>
                 </div>
 
+                {/* 右側僅保留 ⭐ 最愛、📱 示店員、🗑️ 刪除 */}
                 <div style={styles.cardActions}>
-                  {/* ⭐ 最愛按鈕 */}
                   <button 
                     onClick={() => toggleFavorite(item.id)} 
-                    style={item.isFavorite ? styles.favoriteActiveBtn : styles.favoriteBtn}
+                    style={item.isFavorite ? styles.favoriteActiveBtn : styles.iconBtn}
                     title={item.isFavorite ? "取消最愛" : "加入最愛"}
                   >
                     {item.isFavorite ? '⭐' : '☆'}
                   </button>
-                  <button onClick={() => playAudio(item.kr)} style={styles.actionBtn} title="播放發音">
-                    🔊
-                  </button>
-                  <button onClick={() => setFullscreenCard(item)} style={styles.showClerkBtn} title="示店員大字">
-                    📱 示店員
+                  <button onClick={() => setFullscreenCard(item)} style={styles.showClerkIconBtn} title="示店員大字">
+                    📱
                   </button>
                   <button onClick={() => handleDeleteItem(item.id)} style={styles.deleteBtn} title="刪除">
                     🗑️
@@ -372,14 +372,18 @@ export default function App() {
           )}
         </section>
 
-        {/* 📱 示店員大字 Mode (全屏高對比模式) */}
+        {/* 📱 示店員大字 Mode */}
         {fullscreenCard && (
           <div style={styles.modalOverlay} onClick={() => setFullscreenCard(null)}>
             <div style={styles.modalContent} onClick={(e) => e.stopPropagation()}>
               <div style={styles.modalBadge}>💡 直接出示給韓國店員 / 司機看</div>
-              <div style={styles.bigKrBox}>
+              
+              {/* 大字點擊也能發音 */}
+              <div style={styles.bigKrBox} onClick={() => playAudio(fullscreenCard.kr)}>
                 <span style={styles.bigKrText}>{fullscreenCard.kr}</span>
+                <div style={{ fontSize: '12px', color: '#92400E', marginTop: '8px' }}>🔊 點擊大字發音</div>
               </div>
+              
               <div style={styles.bigZhText}>{fullscreenCard.zh}</div>
 
               <div style={styles.modalActions}>
@@ -387,7 +391,7 @@ export default function App() {
                   🔊 播放發音
                 </button>
                 <button onClick={() => setFullscreenCard(null)} style={styles.modalCloseBtn}>
-                  關閉
+                  ✕ 關閉
                 </button>
               </div>
             </div>
@@ -454,8 +458,7 @@ const styles = {
     padding: '8px 14px',
     borderRadius: '20px',
     cursor: 'pointer',
-    fontSize: '12px',
-    transition: 'all 0.2s'
+    fontSize: '12px'
   },
   addToggleActiveBtn: {
     border: 'none',
@@ -641,35 +644,45 @@ const styles = {
   },
   card: {
     backgroundColor: '#FFFFFF',
-    padding: '18px',
+    padding: '14px 16px',
     borderRadius: '20px',
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
     boxShadow: '0 2px 8px rgba(0,0,0,0.02)',
-    border: '1px solid #F0ECE1'
+    border: '1px solid #F0ECE1',
+    gap: '12px'
   },
-  cardMain: {
+  cardMainClickable: {
     display: 'flex',
     flexDirection: 'column',
     gap: '3px',
-    flex: 1
+    flex: 1,
+    minWidth: 0,
+    cursor: 'pointer', // 👈 滑鼠提示可點擊
+    WebkitTapHighlightColor: 'rgba(0,0,0,0.05)' // 👈 手機點擊按壓效果
   },
   krText: {
-    fontSize: '19px',
+    fontSize: '18px',
     fontWeight: '800',
     color: '#1C1C1E',
     display: 'flex',
     alignItems: 'center',
-    gap: '6px'
+    gap: '6px',
+    wordBreak: 'break-word'
+  },
+  speakerIcon: {
+    fontSize: '13px',
+    opacity: 0.6
   },
   customBadge: {
     fontSize: '10px',
     backgroundColor: '#E5E7EB',
     color: '#374151',
-    padding: '2px 6px',
+    padding: '2px 5px',
     borderRadius: '4px',
-    fontWeight: '600'
+    fontWeight: '600',
+    flexShrink: 0
   },
   romajaText: {
     fontSize: '12px',
@@ -677,24 +690,28 @@ const styles = {
     fontWeight: '600'
   },
   zhText: {
-    fontSize: '14px',
+    fontSize: '13px',
     color: '#636366',
     marginTop: '1px'
   },
   cardActions: {
     display: 'flex',
     gap: '6px',
-    alignItems: 'center'
+    alignItems: 'center',
+    flexShrink: 0
   },
-  favoriteBtn: {
+  iconBtn: {
     border: 'none',
     backgroundColor: '#F3F4F6',
-    color: '#9CA3AF',
+    color: '#4B5563',
     width: '36px',
     height: '36px',
-    borderRadius: '12px',
+    borderRadius: '11px',
     fontSize: '16px',
-    cursor: 'pointer'
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center'
   },
   favoriteActiveBtn: {
     border: 'none',
@@ -702,28 +719,25 @@ const styles = {
     color: '#D97706',
     width: '36px',
     height: '36px',
-    borderRadius: '12px',
+    borderRadius: '11px',
     fontSize: '16px',
-    cursor: 'pointer'
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center'
   },
-  actionBtn: {
-    border: 'none',
-    backgroundColor: '#F3F4F6',
-    width: '36px',
-    height: '36px',
-    borderRadius: '12px',
-    fontSize: '16px',
-    cursor: 'pointer'
-  },
-  showClerkBtn: {
+  showClerkIconBtn: {
     border: 'none',
     backgroundColor: '#FEF3C7',
     color: '#78350F',
-    fontWeight: '700',
-    padding: '8px 10px',
-    borderRadius: '12px',
-    fontSize: '12px',
-    cursor: 'pointer'
+    width: '36px',
+    height: '36px',
+    borderRadius: '11px',
+    fontSize: '16px',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center'
   },
   deleteBtn: {
     border: 'none',
@@ -731,7 +745,10 @@ const styles = {
     cursor: 'pointer',
     fontSize: '14px',
     padding: '4px',
-    opacity: 0.5
+    opacity: 0.4,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center'
   },
   modalOverlay: {
     position: 'fixed',
@@ -770,10 +787,11 @@ const styles = {
   },
   bigKrBox: {
     width: '100%',
-    padding: '20px 10px',
+    padding: '24px 10px',
     backgroundColor: '#FFFBEB',
     borderRadius: '20px',
-    border: '2px dashed #FDE68A'
+    border: '2px dashed #FDE68A',
+    cursor: 'pointer'
   },
   bigKrText: {
     fontSize: '34px',
