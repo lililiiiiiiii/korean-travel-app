@@ -3,50 +3,51 @@ import React, { useState, useEffect } from 'react';
 // 📚 韓國旅遊高頻精選詞彙庫 (餐廳、市場、計程車、交通、常用、應急)
 const INITIAL_VOCAB = [
   // 🍱 餐廳/點餐 (Dining)
-  { id: 1, category: 'dining', kr: '여기요!', zh: '不好意思 / 老闆！（餐廳呼叫）', romaja: 'Yeo-gi-yo!' },
-  { id: 2, category: 'dining', kr: '이거 주세요.', zh: '請給我這個 (指菜單)', romaja: 'I-geo ju-se-yo.' },
-  { id: 3, category: 'dining', kr: '물 좀 주세요.', zh: '請給我水', romaja: 'Mul jom ju-se-yo.' },
-  { id: 4, category: 'dining', kr: '덜 맵게 해주세요.', zh: '請做不那麼辣 (少辣)', romaja: 'Deol maep-ge hae-ju-se-yo.' },
-  { id: 5, category: 'dining', kr: '고수 넣지 마세요.', zh: '請不要加香菜', romaja: 'Go-su neoch-ji ma-se-yo.' },
-  { id: 6, category: 'dining', kr: '반찬 더 주세요.', zh: '請再給我一點小菜', romaja: 'Ban-chan deo ju-se-yo.' },
-  { id: 7, category: 'dining', kr: '포장해 주세요.', zh: '請幫我打包', romaja: 'Po-jang-hae ju-se-yo.' },
-  { id: 8, category: 'dining', kr: '계산해 주세요.', zh: '請幫我結帳', romaja: 'Gye-san-hae ju-se-yo.' },
-  { id: 9, category: 'dining', kr: '따로 계산해 주세요.', zh: '請分開結帳', romaja: 'Tta-ro gye-san-hae ju-se-yo.' },
+  { id: 1, category: 'dining', kr: '여기요!', zh: '不好意思 / 老闆！（餐廳呼叫）', romaja: 'Yeo-gi-yo!', isFavorite: false },
+  { id: 2, category: 'dining', kr: '이거 주세요.', zh: '請給我這個 (指菜單)', romaja: 'I-geo ju-se-yo.', isFavorite: true },
+  { id: 3, category: 'dining', kr: '물 좀 주세요.', zh: '請給我水', romaja: 'Mul jom ju-se-yo.', isFavorite: true },
+  { id: 4, category: 'dining', kr: '덜 맵게 해주세요.', zh: '請做不那麼辣 (少辣)', romaja: 'Deol maep-ge hae-ju-se-yo.', isFavorite: false },
+  { id: 5, category: 'dining', kr: '고수 넣지 마세요.', zh: '請不要加香菜', romaja: 'Go-su neoch-ji ma-se-yo.', isFavorite: false },
+  { id: 6, category: 'dining', kr: '반찬 더 주세요.', zh: '請再給我一點小菜', romaja: 'Ban-chan deo ju-se-yo.', isFavorite: false },
+  { id: 7, category: 'dining', kr: '포장해 주세요.', zh: '請幫我打包', romaja: 'Po-jang-hae ju-se-yo.', isFavorite: false },
+  { id: 8, category: 'dining', kr: '계산해 주세요.', zh: '請幫我結帳', romaja: 'Gye-san-hae ju-se-yo.', isFavorite: true },
+  { id: 9, category: 'dining', kr: '따로 계산해 주세요.', zh: '請分開結帳', romaja: 'Tta-ro gye-san-hae ju-se-yo.', isFavorite: false },
 
   // 🍢 傳統市場/購物 (Market & Shopping)
-  { id: 10, category: 'market', kr: '얼마예요?', zh: '這個多少錢？', romaja: 'Eol-ma-ye-yo?' },
-  { id: 11, category: 'market', kr: '이거 맛볼 수 있어요?', zh: '這個可以試吃嗎？', romaja: 'I-geo mat-bol su iss-eo-yo?' },
-  { id: 12, category: 'market', kr: '깎아주세요.', zh: '算便宜一點啦～', romaja: 'Gkak-a-ju-se-yo.' },
-  { id: 13, category: 'market', kr: '현금으로 하면 깎아주나요?', zh: '付現金有算便宜嗎？', romaja: 'Hyeon-geum-eu-ro ha-myeon gkak-a-ju-na-yo?' },
-  { id: 14, category: 'market', kr: '봉투 주세요.', zh: '請給我袋子', romaja: 'Bong-tu ju-se-yo.' },
-  { id: 15, category: 'market', kr: '카드 돼요?', zh: '可以刷卡嗎？', romaja: 'Ka-deu dwae-yo?' },
-  { id: 16, category: 'market', kr: '택스 리펀 돼요?', zh: '可以退稅嗎？', romaja: 'Taek-seu ri-peon dwae-yo?' },
+  { id: 10, category: 'market', kr: '얼마예요?', zh: '這個多少錢？', romaja: 'Eol-ma-ye-yo?', isFavorite: true },
+  { id: 11, category: 'market', kr: '이거 맛볼 수 있어요?', zh: '這個可以試吃嗎？', romaja: 'I-geo mat-bol su iss-eo-yo?', isFavorite: false },
+  { id: 12, category: 'market', kr: '깎아주세요.', zh: '算便宜一點啦～', romaja: 'Gkak-a-ju-se-yo.', isFavorite: false },
+  { id: 13, category: 'market', kr: '현금으로 하면 깎아주나요?', zh: '付現金有算便宜嗎？', romaja: 'Hyeon-geum-eu-ro ha-myeon gkak-a-ju-na-yo?', isFavorite: false },
+  { id: 14, category: 'market', kr: '봉투 주세요.', zh: '請給我袋子', romaja: 'Bong-tu ju-se-yo.', isFavorite: false },
+  { id: 15, category: 'market', kr: '카드 돼요?', zh: '可以刷卡嗎？', romaja: 'Ka-deu dwae-yo?', isFavorite: false },
+  { id: 16, category: 'market', kr: '택스 리펀 돼요?', zh: '可以退稅嗎？', romaja: 'Taek-seu ri-peon dwae-yo?', isFavorite: false },
 
   // 🚕 計程車 (Taxi)
-  { id: 17, category: 'taxi', kr: '이 주소로 가주세요.', zh: '請帶我去這個地址 (出示手機)', romaja: 'I ju-so-ro ga-ju-se-yo.' },
-  { id: 18, category: 'taxi', kr: '트렁크 좀 열어주세요.', zh: '請幫我開後備箱 (放行李)', romaja: 'Teu-reong-keu jom yeol-eo-ju-se-yo.' },
-  { id: 19, category: 'taxi', kr: '여기서 내려주세요.', zh: '請在這裡讓我下車', romaja: 'Yeo-gi-seo nae-ryeo-ju-se-yo.' },
-  { id: 20, category: 'taxi', kr: '얼마나 걸려요?', zh: '大概需要多久時間？', romaja: 'Eol-ma-na geol-ryeo-yo?' },
-  { id: 21, category: 'taxi', kr: '영수증 주세요.', zh: '請給我收據', romaja: 'Yeong-su-jeung ju-se-yo.' },
+  { id: 17, category: 'taxi', kr: '이 주소로 가주세요.', zh: '請帶我去這個地址 (出示手機)', romaja: 'I ju-so-ro ga-ju-se-yo.', isFavorite: true },
+  { id: 18, category: 'taxi', kr: '트렁크 좀 열어주세요.', zh: '請幫我開後備箱 (放行李)', romaja: 'Teu-reong-keu jom yeol-eo-ju-se-yo.', isFavorite: false },
+  { id: 19, category: 'taxi', kr: '여기서 내려주세요.', zh: '請在這裡讓我下車', romaja: 'Yeo-gi-seo nae-ryeo-ju-se-yo.', isFavorite: true },
+  { id: 20, category: 'taxi', kr: '얼마나 걸려요?', zh: '大概需要多久時間？', romaja: 'Eol-ma-na geol-ryeo-yo?', isFavorite: false },
+  { id: 21, category: 'taxi', kr: '영수증 주세요.', zh: '請給我收據', romaja: 'Yeong-su-jeung ju-se-yo.', isFavorite: false },
 
   // 🚇 交通/問路 (Transport)
-  { id: 22, category: 'transport', kr: '화장실이 어디예요?', zh: '洗手間在哪裡？', romaja: 'Hwa-jang-sil-i eo-di-ye-yo?' },
-  { id: 23, category: 'transport', kr: '지하철역이 어디예요?', zh: '地鐵站在哪裡？', romaja: 'Ji-ha-cheol-yeok-i eo-di-ye-yo?' },
-  { id: 24, category: 'transport', kr: '티머니 충전해 주세요.', zh: '請幫我的 T-Money 卡加值', romaja: 'T-money chung-jeon-hae ju-se-yo.' },
-  { id: 25, category: 'transport', kr: '이 버스 홍대로 가나요?', zh: '這公車有去弘大嗎？', romaja: 'I beo-seu Hong-dae-ro ga-na-yo?' },
+  { id: 22, category: 'transport', kr: '화장실이 어디예요?', zh: '洗手間在哪裡？', romaja: 'Hwa-jang-sil-i eo-di-ye-yo?', isFavorite: true },
+  { id: 23, category: 'transport', kr: '지하철역이 어디예요?', zh: '地鐵站在哪裡？', romaja: 'Ji-ha-cheol-yeok-i eo-di-ye-yo?', isFavorite: false },
+  { id: 24, category: 'transport', kr: '티머니 충전해 주세요.', zh: '請幫我的 T-Money 卡加值', romaja: 'T-money chung-jeon-hae ju-se-yo.', isFavorite: false },
+  { id: 25, category: 'transport', kr: '이 버스 홍대로 가나요?', zh: '這公車有去弘大嗎？', romaja: 'I beo-seu Hong-dae-ro ga-na-yo?', isFavorite: false },
 
   // 👋 常用/應急 (Basic & Emergency)
-  { id: 26, category: 'basic', kr: '안녕하세요.', zh: '你好', romaja: 'An-nyeong-ha-se-yo.' },
-  { id: 27, category: 'basic', kr: '감사합니다.', zh: '謝謝', romaja: 'Gam-sa-ham-ni-da.' },
-  { id: 28, category: 'basic', kr: '죄송합니다.', zh: '對不起 / 不好意思', romaja: 'Jwe-song-ham-ni-da.' },
-  { id: 29, category: 'basic', kr: '괜찮아요.', zh: '沒關係 / 不用了', romaja: 'Gwaen-chan-a-yo.' },
-  { id: 30, category: 'basic', kr: '와이파이 비밀번호가 뭐예요?', zh: 'WiFi 密碼是什麼？', romaja: 'Wi-fi bi-mil-beon-ho-ga meoe-ye-yo?' },
-  { id: 31, category: 'emergency', kr: '도와주세요!', zh: '請幫幫我！', romaja: 'Do-wa-ju-se-yo!' },
-  { id: 32, category: 'emergency', kr: '약국이 어디예요?', zh: '藥局在哪裡？', romaja: 'Yak-guk-i eo-di-ye-yo?' }
+  { id: 26, category: 'basic', kr: '안녕하세요.', zh: '你好', romaja: 'An-nyeong-ha-se-yo.', isFavorite: false },
+  { id: 27, category: 'basic', kr: '감사합니다.', zh: '謝謝', romaja: 'Gam-sa-ham-ni-da.', isFavorite: true },
+  { id: 28, category: 'basic', kr: '죄송합니다.', zh: '對不起 / 不好意思', romaja: 'Jwe-song-ham-ni-da.', isFavorite: false },
+  { id: 29, category: 'basic', kr: '괜찮아요.', zh: '沒關係 / 不用了', romaja: 'Gwaen-chan-a-yo.', isFavorite: false },
+  { id: 30, category: 'basic', kr: '와이파이 비밀번호가 뭐예요?', zh: 'WiFi 密碼是什麼？', romaja: 'Wi-fi bi-mil-beon-ho-ga meoe-ye-yo?', isFavorite: false },
+  { id: 31, category: 'emergency', kr: '도와주세요!', zh: '請幫幫我！', romaja: 'Do-wa-ju-se-yo!', isFavorite: false },
+  { id: 32, category: 'emergency', kr: '약국이 어디예요?', zh: '藥局在哪裡？', romaja: 'Yak-guk-i eo-di-ye-yo?', isFavorite: false }
 ];
 
 const CATEGORIES = [
   { id: 'ALL', name: '✨ 全部' },
+  { id: 'FAV', name: '⭐ 最愛' },
   { id: 'dining', name: '🍱 餐廳/點餐' },
   { id: 'market', name: '🍢 傳統市場' },
   { id: 'taxi', name: '🚕 計程車' },
@@ -63,6 +64,7 @@ export default function App() {
 
   const [selectedCategory, setSelectedCategory] = useState('ALL');
   const [searchQuery, setSearchQuery] = useState('');
+  const [sortBy, setSortBy] = useState('favorite'); // 'favorite' | 'newest' | 'default'
   const [fullscreenCard, setFullscreenCard] = useState(null);
 
   const [showAddForm, setShowAddForm] = useState(false);
@@ -106,6 +108,13 @@ export default function App() {
     const audioUrl = `https://dict.youdao.com/dictvoice?type=0&le=ko&audio=${encodeURIComponent(cleanText)}`;
     const audio = new Audio(audioUrl);
     audio.play().catch((err) => console.log('Audio playback prevented:', err));
+  };
+
+  // ⭐ 切換最愛狀態
+  const toggleFavorite = (id) => {
+    setItems(items.map(item => 
+      item.id === id ? { ...item, isFavorite: !item.isFavorite } : item
+    ));
   };
 
   // ⚙️ 恢復預設詞彙 (保留自訂項)
@@ -166,8 +175,9 @@ export default function App() {
       category: newCategory,
       kr: translatedKr,
       zh: newZh.trim(),
-      romaja: 'Auto-translated',
-      isCustom: true
+      romaja: '',
+      isCustom: true,
+      isFavorite: false
     };
 
     setItems([newItem, ...items]);
@@ -181,23 +191,30 @@ export default function App() {
     setItems(items.filter((item) => item.id !== id));
   };
 
-  // 過濾邏輯
-  const filteredItems = items.filter((item) => {
-    const matchesCat = selectedCategory === 'ALL' || item.category === selectedCategory;
-    const matchesQuery =
-      item.kr.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.zh.includes(searchQuery) ||
-      (item.romaja && item.romaja.toLowerCase().includes(searchQuery.toLowerCase()));
-    return matchesCat && matchesQuery;
-  });
+  // 🔍 過濾與 🔀 排序邏輯
+  const filteredAndSortedItems = items
+    .filter((item) => {
+      const matchesCat = 
+        selectedCategory === 'ALL' ? true :
+        selectedCategory === 'FAV' ? item.isFavorite :
+        item.category === selectedCategory;
 
-  // 韓文組合字轉羅馬拼音的簡易轉換器
-  const getRomaja = (text) => {
-    if (!text) return '';
-    // 如果包含了自訂標記，不顯示 Auto-translated，直接留空或保留原文
-    return ''; 
-  };
+      const matchesQuery =
+        item.kr.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.zh.includes(searchQuery) ||
+        (item.romaja && item.romaja.toLowerCase().includes(searchQuery.toLowerCase()));
 
+      return matchesCat && matchesQuery;
+    })
+    .sort((a, b) => {
+      if (sortBy === 'favorite') {
+        if (a.isFavorite === b.isFavorite) return 0;
+        return a.isFavorite ? -1 : 1;
+      } else if (sortBy === 'newest') {
+        return b.id - a.id;
+      }
+      return 0;
+    });
 
   return (
     <div style={styles.appContainer}>
@@ -239,8 +256,8 @@ export default function App() {
             </div>
           )}
 
-          {/* 搜尋框 */}
-          <div style={styles.searchWrapper}>
+          {/* 搜尋框與排序選擇 */}
+          <div style={styles.searchAndSortRow}>
             <input
               type="text"
               placeholder="🔍 搜尋韓文、中文、拼音"
@@ -248,6 +265,15 @@ export default function App() {
               onChange={(e) => setSearchQuery(e.target.value)}
               style={styles.searchInput}
             />
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              style={styles.sortSelect}
+            >
+              <option value="favorite">⭐ 最愛優先</option>
+              <option value="newest">🕒 最新新增</option>
+              <option value="default">📋 預設順序</option>
+            </select>
           </div>
 
           {/* 分類 Chips */}
@@ -303,24 +329,34 @@ export default function App() {
 
         {/* 詞彙卡片列表 */}
         <section style={styles.listSection}>
-          {filteredItems.length === 0 ? (
+          {filteredAndSortedItems.length === 0 ? (
             <div style={styles.emptyCard}>
-              <p style={styles.emptyText}>未找到相關單字或句子</p>
+              <p style={styles.emptyText}>未找到相關單字或最愛句子</p>
               <button onClick={handleResetToDefault} style={styles.resetInlineBtn}>恢復預設詞彙</button>
             </div>
           ) : (
-            filteredItems.map((item) => (
+            filteredAndSortedItems.map((item) => (
               <div key={item.id} style={styles.card}>
                 <div style={styles.cardMain}>
                   <div style={styles.krText}>
                     {item.kr}
                     {item.isCustom && <span style={styles.customBadge}>自訂</span>}
                   </div>
-                  {item.romaja && item.romaja !== 'Auto-translated' && (<div style={styles.romajaText}>{item.romaja}</div>)}
+                  {item.romaja && item.romaja !== 'Auto-translated' && (
+                    <div style={styles.romajaText}>{item.romaja}</div>
+                  )}
                   <div style={styles.zhText}>{item.zh}</div>
                 </div>
 
                 <div style={styles.cardActions}>
+                  {/* ⭐ 最愛按鈕 */}
+                  <button 
+                    onClick={() => toggleFavorite(item.id)} 
+                    style={item.isFavorite ? styles.favoriteActiveBtn : styles.favoriteBtn}
+                    title={item.isFavorite ? "取消最愛" : "加入最愛"}
+                  >
+                    {item.isFavorite ? '⭐' : '☆'}
+                  </button>
                   <button onClick={() => playAudio(item.kr)} style={styles.actionBtn} title="播放發音">
                     🔊
                   </button>
@@ -410,12 +446,6 @@ const styles = {
     margin: 0,
     letterSpacing: '-0.3px'
   },
-  brandSubtitle: {
-    fontSize: '11px',
-    color: '#8E8E93',
-    margin: 0,
-    fontWeight: '500'
-  },
   addToggleBtn: {
     border: 'none',
     backgroundColor: '#F0ECE1',
@@ -480,11 +510,13 @@ const styles = {
     fontSize: '12px',
     cursor: 'pointer'
   },
-  searchWrapper: {
+  searchAndSortRow: {
+    display: 'flex',
+    gap: '8px',
     width: '100%'
   },
   searchInput: {
-    width: '100%',
+    flex: 1,
     padding: '12px 14px',
     backgroundColor: '#F3F4F6',
     border: 'none',
@@ -493,6 +525,17 @@ const styles = {
     outline: 'none',
     boxSizing: 'border-box',
     color: '#1C1C1E'
+  },
+  sortSelect: {
+    padding: '0 10px',
+    backgroundColor: '#F3F4F6',
+    border: 'none',
+    borderRadius: '14px',
+    fontSize: '12px',
+    fontWeight: '600',
+    color: '#374151',
+    outline: 'none',
+    cursor: 'pointer'
   },
   categoryBar: {
     display: 'flex',
@@ -643,11 +686,31 @@ const styles = {
     gap: '6px',
     alignItems: 'center'
   },
+  favoriteBtn: {
+    border: 'none',
+    backgroundColor: '#F3F4F6',
+    color: '#9CA3AF',
+    width: '36px',
+    height: '36px',
+    borderRadius: '12px',
+    fontSize: '16px',
+    cursor: 'pointer'
+  },
+  favoriteActiveBtn: {
+    border: 'none',
+    backgroundColor: '#FEF3C7',
+    color: '#D97706',
+    width: '36px',
+    height: '36px',
+    borderRadius: '12px',
+    fontSize: '16px',
+    cursor: 'pointer'
+  },
   actionBtn: {
     border: 'none',
     backgroundColor: '#F3F4F6',
-    width: '38px',
-    height: '38px',
+    width: '36px',
+    height: '36px',
     borderRadius: '12px',
     fontSize: '16px',
     cursor: 'pointer'
@@ -657,7 +720,7 @@ const styles = {
     backgroundColor: '#FEF3C7',
     color: '#78350F',
     fontWeight: '700',
-    padding: '8px 12px',
+    padding: '8px 10px',
     borderRadius: '12px',
     fontSize: '12px',
     cursor: 'pointer'
